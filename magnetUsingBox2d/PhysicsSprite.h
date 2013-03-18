@@ -13,5 +13,7 @@
 {
 	b2Body *body_;	// strong ref
 }
--(void) setPhysicsBody:(b2Body*)body;
+
+@property (nonatomic ) b2Body *body;
+//-(void) setPhysicsBody:(b2Body*)body;
 @end

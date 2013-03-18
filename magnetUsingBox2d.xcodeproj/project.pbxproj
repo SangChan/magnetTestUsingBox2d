@@ -545,6 +545,8 @@
 		630B9D8316F6BB720084CAC5 /* PhysicsSprite.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PhysicsSprite.h; sourceTree = "<group>"; };
 		630B9D8416F6BB720084CAC5 /* PhysicsSprite.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PhysicsSprite.mm; sourceTree = "<group>"; };
 		630B9D8616F6BB720084CAC5 /* blocks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = blocks.png; path = Resources/blocks.png; sourceTree = "<group>"; };
+		630B9F9D16F6D9670084CAC5 /* Magnet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Magnet.h; sourceTree = "<group>"; };
+		630B9F9E16F6D97D0084CAC5 /* MagnetTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MagnetTest.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -603,6 +605,8 @@
 		630B9B6C16F6BB6E0084CAC5 /* magnetUsingBox2d */ = {
 			isa = PBXGroup;
 			children = (
+				630B9F9E16F6D97D0084CAC5 /* MagnetTest.h */,
+				630B9F9D16F6D9670084CAC5 /* Magnet.h */,
 				630B9D7716F6BB720084CAC5 /* AppDelegate.h */,
 				630B9D7816F6BB720084CAC5 /* AppDelegate.mm */,
 				630B9D7A16F6BB720084CAC5 /* HelloWorldLayer.h */,

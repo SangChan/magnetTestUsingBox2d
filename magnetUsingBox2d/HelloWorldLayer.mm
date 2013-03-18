@@ -13,6 +13,7 @@
 #import "AppDelegate.h"
 
 #import "PhysicsSprite.h"
+#import "Magnet.h"
 
 enum {
 	kTagParentNode = 1,
@@ -58,7 +59,7 @@ enum {
 		[self initPhysics];
 		
 		// create reset button
-		[self createMenu];
+		//[self createMenu];
 		
 		//Set up sprite
 		
@@ -152,7 +153,7 @@ enum {
 	CGSize s = [[CCDirector sharedDirector] winSize];
 	
 	b2Vec2 gravity;
-	gravity.Set(0.0f, -10.0f);
+	gravity.Set(0.0f, 0.0f);
 	world = new b2World(gravity);
 	
 	
@@ -228,12 +229,12 @@ enum {
 	
 	//We have a 64x64 sprite sheet with 4 different 32x32 images.  The following code is
 	//just randomly picking one of the images
-	int idx = (CCRANDOM_0_1() > .5 ? 0:1);
-	int idy = (CCRANDOM_0_1() > .5 ? 0:1);
-	PhysicsSprite *sprite = [PhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(32 * idx,32 * idy,32,32)];						
-	[parent addChild:sprite];
+	//int idx = (CCRANDOM_0_1() > .5 ? 0:1);
+	//int idy = (CCRANDOM_0_1() > .5 ? 0:1);
+	block = [PhysicsSprite spriteWithTexture:spriteTexture_ rect:CGRectMake(0,0,64,64)];
+	[parent addChild:block];
 	
-	sprite.position = ccp( p.x, p.y);
+	block.position = ccp( p.x, p.y);
 	
 	// Define the dynamic body.
 	//Set up a 1m squared box in the physics world
@@ -244,7 +245,7 @@ enum {
 	
 	// Define another box shape for our dynamic body.
 	b2PolygonShape dynamicBox;
-	dynamicBox.SetAsBox(.5f, .5f);//These are mid points for our 1m box
+	dynamicBox.SetAsBox(1.0, 1.0);//These are mid points for our 1m box
 	
 	// Define the dynamic body fixture.
 	b2FixtureDef fixtureDef;
@@ -253,7 +254,7 @@ enum {
 	fixtureDef.friction = 0.3f;
 	body->CreateFixture(&fixtureDef);
 	
-	[sprite setPhysicsBody:body];
+	[block setBody:body];
 }
 
 -(void) update: (ccTime) dt
@@ -271,7 +272,7 @@ enum {
 	world->Step(dt, velocityIterations, positionIterations);	
 }
 
-- (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+/*- (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
 	//Add a new body/atlas sprite at the touched location
 	for( UITouch *touch in touches ) {
@@ -281,6 +282,40 @@ enum {
 		
 		[self addNewSpriteAtPosition: location];
 	}
+}*/
+
+-(void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    CGPoint location = [touch locationInView:[touch view]];
+    CGPoint convertedLocation = [[CCDirector sharedDirector]convertToGL:location];
+    
+    CGFloat halfWidth = block.contentSize.width / 2.0;
+    CGFloat halfHeight = block.contentSize.height / 2.0;
+    
+    if (convertedLocation.x > (block.position.x + halfWidth) || convertedLocation.x < (block.position.x - halfWidth) ||
+        convertedLocation.y > (block.position.y + halfHeight) || convertedLocation.y < (block.position.y - halfHeight))  {
+        isBlockTouched = NO;
+    } else {
+        isBlockTouched = YES;
+        startLocation = ccp(convertedLocation.x,convertedLocation.y);
+    }
+
+}
+
+-(void)ccTouchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    if (!isBlockTouched) return ;
+    
+    NSLog(@"touch move");
+    UITouch *touch = [touches anyObject];
+    CGPoint location = [touch locationInView:[touch view]];
+    CGPoint convertedLocation = [[CCDirector sharedDirector] convertToGL:location];
+    
+    
+    block.body->ApplyForce(b2Vec2(0, 100), block.body->GetPosition());
+    //CGPoint newLocation = ccp(convertedLocation.x,convertedLocation.y);
+    //block.position = newLocation;
+    //[block.physicbody]
+
 }
 
 #pragma mark GameKit delegate
