@@ -13,7 +13,6 @@
 #import "AppDelegate.h"
 
 #import "PhysicsSprite.h"
-#import "Magnet.h"
 
 enum {
 	kTagParentNode = 1,
@@ -25,7 +24,7 @@ enum {
 @interface HelloWorldLayer()
 -(void) initPhysics;
 -(void) addNewSpriteAtPosition:(CGPoint)p;
--(void) createMenu;
+-(void) addMagnetAtPosition:(CGPoint)p;
 @end
 
 @implementation HelloWorldLayer
@@ -75,13 +74,14 @@ enum {
 		[self addChild:parent z:0 tag:kTagParentNode];
 		
 		
-		[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2)];
+		[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2-200)];
 		
-		CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
-		[self addChild:label z:0];
-		[label setColor:ccc3(0,0,255)];
-		label.position = ccp( s.width/2, s.height-50);
-		
+		//CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
+		//[self addChild:label z:0];
+		//[label setColor:ccc3(0,0,255)];
+		//label.position = ccp( s.width/2, s.height-50);
+		[self addMagnetAtPosition : ccp(s.width/2, s.height/2+200)];
+        
 		[self scheduleUpdate];
 	}
 	return self;
@@ -97,7 +97,7 @@ enum {
 	
 	[super dealloc];
 }	
-
+/*
 -(void) createMenu
 {
 	// Default font size will be 22 points.
@@ -145,7 +145,7 @@ enum {
 	
 	
 	[self addChild: menu z:-1];	
-}
+}*/
 
 -(void) initPhysics
 {
@@ -189,19 +189,19 @@ enum {
 	// bottom
 	
 	groundBox.Set(b2Vec2(0,0), b2Vec2(s.width/PTM_RATIO,0));
-	groundBody->CreateFixture(&groundBox,0);
+	groundBody->CreateFixture(&groundBox,2);
 	
 	// top
 	groundBox.Set(b2Vec2(0,s.height/PTM_RATIO), b2Vec2(s.width/PTM_RATIO,s.height/PTM_RATIO));
-	groundBody->CreateFixture(&groundBox,0);
+	groundBody->CreateFixture(&groundBox,2);
 	
 	// left
 	groundBox.Set(b2Vec2(0,s.height/PTM_RATIO), b2Vec2(0,0));
-	groundBody->CreateFixture(&groundBox,0);
+	groundBody->CreateFixture(&groundBox,2);
 	
 	// right
 	groundBox.Set(b2Vec2(s.width/PTM_RATIO,s.height/PTM_RATIO), b2Vec2(s.width/PTM_RATIO,0));
-	groundBody->CreateFixture(&groundBox,0);
+	groundBody->CreateFixture(&groundBox,2);
 }
 
 -(void) draw
@@ -252,9 +252,34 @@ enum {
 	fixtureDef.shape = &dynamicBox;	
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
+    fixtureDef.restitution = 0.6f;
 	body->CreateFixture(&fixtureDef);
 	
 	[block setBody:body];
+}
+
+-(void) addMagnetAtPosition:(CGPoint)p {
+    
+    MagnetBody *magnetBody;
+    
+    magnet->getInstance()->init();
+    magnet->getInstance()->setWorld(world);
+    magnet->getInstance()->setDeugDraw(m_debugDraw);
+    {
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position.Set(p.x/PTM_RATIO,p.y/PTM_RATIO);
+        b2Body *body;
+        body = world->CreateBody(&def);
+        magnet->getInstance()->addMagnetism(body);
+        //body->SetUserData(@"magnet");
+        {
+            b2CircleShape shape;
+            shape.m_radius= 1.0f;
+            body->CreateFixture(&shape,2);
+        }
+        magnetBody = magnet->getInstance()->createMagnetBody(body,5000);
+    }
 }
 
 -(void) update: (ccTime) dt
@@ -269,7 +294,9 @@ enum {
 	
 	// Instruct the world to perform a single step of simulation. It is
 	// generally best to keep the time step and iterations fixed.
-	world->Step(dt, velocityIterations, positionIterations);	
+	world->Step(dt, velocityIterations, positionIterations); 
+    block.position = ccp(block.body->GetPosition().x * PTM_RATIO, block.body->GetPosition().y * PTM_RATIO);
+    magnet->getInstance()->update(dt);
 }
 
 /*- (void)ccTouchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -285,6 +312,8 @@ enum {
 }*/
 
 -(void)ccTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    NSLog(@"touch begin");
+    
     UITouch *touch = [touches anyObject];
     CGPoint location = [touch locationInView:[touch view]];
     CGPoint convertedLocation = [[CCDirector sharedDirector]convertToGL:location];
@@ -310,26 +339,17 @@ enum {
     CGPoint location = [touch locationInView:[touch view]];
     CGPoint convertedLocation = [[CCDirector sharedDirector] convertToGL:location];
     
+    CGFloat destX = convertedLocation.x - startLocation.x;
+    CGFloat destY = convertedLocation.y - startLocation.y;
     
-    block.body->ApplyForce(b2Vec2(0, 100), block.body->GetPosition());
+    //block.body->ApplyForce(b2Vec2(convertedLocation.x,convertedLocation.y), block.body->GetPosition());
+    
+    block.body->ApplyLinearImpulse(b2Vec2(destX,destY),block.body->GetWorldCenter());
+    
     //CGPoint newLocation = ccp(convertedLocation.x,convertedLocation.y);
     //block.position = newLocation;
     //[block.physicbody]
 
-}
-
-#pragma mark GameKit delegate
-
--(void) achievementViewControllerDidFinish:(GKAchievementViewController *)viewController
-{
-	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-	[[app navController] dismissModalViewControllerAnimated:YES];
-}
-
--(void) leaderboardViewControllerDidFinish:(GKLeaderboardViewController *)viewController
-{
-	AppController *app = (AppController*) [[UIApplication sharedApplication] delegate];
-	[[app navController] dismissModalViewControllerAnimated:YES];
 }
 
 @end
