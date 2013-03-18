@@ -168,8 +168,11 @@ public:
 					if(r <= magnetBody->radius)
 					{
 						distance.Normalize();
-						body->ApplyForceToCenter(b2Vec2(magnetBody->force /(r*r) * distance));
-					}
+                        body->ApplyForce(b2Vec2(magnetBody->force /(r*r) * distance), magnetBody->body->GetPosition());
+                        if (r < 1) {
+                            body->SetAwake(false);
+                        }
+                    }
 				}
 			}
 		}

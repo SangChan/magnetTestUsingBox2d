@@ -73,14 +73,14 @@ enum {
 #endif
 		[self addChild:parent z:0 tag:kTagParentNode];
 		
-		
+		[self addMagnetAtPosition : ccp(s.width/2, s.height/2+200)];
 		[self addNewSpriteAtPosition:ccp(s.width/2, s.height/2-200)];
 		
 		//CCLabelTTF *label = [CCLabelTTF labelWithString:@"Tap screen" fontName:@"Marker Felt" fontSize:32];
 		//[self addChild:label z:0];
 		//[label setColor:ccc3(0,0,255)];
 		//label.position = ccp( s.width/2, s.height-50);
-		[self addMagnetAtPosition : ccp(s.width/2, s.height/2+200)];
+		
         
 		[self scheduleUpdate];
 	}
@@ -255,6 +255,8 @@ enum {
     fixtureDef.restitution = 0.6f;
 	body->CreateFixture(&fixtureDef);
 	
+    magnet->getInstance()->addMagnetism(body);
+    
 	[block setBody:body];
 }
 
@@ -269,16 +271,16 @@ enum {
         b2BodyDef def;
         def.type = b2_staticBody;
         def.position.Set(p.x/PTM_RATIO,p.y/PTM_RATIO);
-        b2Body *body;
-        body = world->CreateBody(&def);
-        magnet->getInstance()->addMagnetism(body);
+        b2Body *body = world->CreateBody(&def);
         //body->SetUserData(@"magnet");
         {
+            //b2PolygonShape shape;
+            //shape.SetAsBox(1.0f, 1.0f);
             b2CircleShape shape;
-            shape.m_radius= 1.0f;
-            body->CreateFixture(&shape,2);
+            shape.m_radius = 1.0f;
+            body->CreateFixture(&shape,0);
         }
-        magnetBody = magnet->getInstance()->createMagnetBody(body,5000);
+        magnetBody = magnet->getInstance()->createMagnetBody(body,1500,10);
     }
 }
 
