@@ -169,10 +169,10 @@ public:
 					{
 						distance.Normalize();
                         body->ApplyForce(b2Vec2(magnetBody->force /(r*r) * distance), magnetBody->body->GetPosition());
-                        //if (r < 2) {
-                            //body->GetFixtureList()->SetRestitution(0.0f);
-                        //    body->SetAwake(false);
-                        //}
+                        if (r < 1) {
+                            body->SetAwake(false);
+                            body->SetTransform(magnetBody->body->GetPosition(), body->GetAngle());
+                        }
                     }
 				}
 			}

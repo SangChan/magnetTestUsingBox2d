@@ -285,9 +285,16 @@ enum {
             vs[1].Set(-1.0f, 1.0f);
             vs[2].Set(1.0f, 1.0f);
             vs[3].Set(1.0f, -1.0f);
-            b2ChainShape chain;
-            chain.CreateLoop(vs, 4);
-            body->CreateFixture(&chain,0);
+            //b2ChainShape chain;
+            //chain.CreateLoop(vs, 4);
+            //body->CreateFixture(&chain,0);
+            b2EdgeShape edge;
+            edge.Set(vs[1], vs[2]);
+            edge.m_hasVertex0 = true;
+            edge.m_hasVertex3 = true;
+            edge.m_vertex0 = vs[0];
+            edge.m_vertex3 = vs[3];
+            body->CreateFixture(&edge,0);
         }
         magnetBody = magnet->getInstance()->createMagnetBody(body,1500,10);
     }
