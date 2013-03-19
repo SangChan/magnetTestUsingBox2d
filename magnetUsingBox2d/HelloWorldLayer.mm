@@ -240,7 +240,8 @@ enum {
 	//Set up a 1m squared box in the physics world
 	b2BodyDef bodyDef;
 	bodyDef.type = b2_dynamicBody;
-	bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
+    bodyDef.position.Set(p.x/PTM_RATIO, p.y/PTM_RATIO);
+    bodyDef.fixedRotation = true;
 	b2Body *body = world->CreateBody(&bodyDef);
 	
 	// Define another box shape for our dynamic body.
@@ -276,9 +277,17 @@ enum {
         {
             //b2PolygonShape shape;
             //shape.SetAsBox(1.0f, 1.0f);
-            b2CircleShape shape;
-            shape.m_radius = 1.0f;
-            body->CreateFixture(&shape,0);
+            //b2CircleShape shape;
+            //shape.m_radius = 1.0f;
+            //body->CreateFixture(&shape,0);
+            b2Vec2 vs[4];
+            vs[0].Set(-1.0f, -1.0f);
+            vs[1].Set(-1.0f, 1.0f);
+            vs[2].Set(1.0f, 1.0f);
+            vs[3].Set(1.0f, -1.0f);
+            b2ChainShape chain;
+            chain.CreateLoop(vs, 4);
+            body->CreateFixture(&chain,0);
         }
         magnetBody = magnet->getInstance()->createMagnetBody(body,1500,10);
     }
@@ -344,13 +353,20 @@ enum {
     CGFloat destX = convertedLocation.x - startLocation.x;
     CGFloat destY = convertedLocation.y - startLocation.y;
     
+    CGFloat destLength = fabsf(ccpDistance(startLocation, convertedLocation));
+    if (destLength > 35) {
+        block.body->ApplyLinearImpulse(b2Vec2(destX,destY),block.body->GetWorldCenter());
+    }
+    else {
+        block.body->SetTransform(b2Vec2(convertedLocation.x /PTM_RATIO,convertedLocation.y/PTM_RATIO ),  block.body->GetAngle());
+        //b2Vec2 newForce = block.body->GetLinearVelocityFromWorldPoint(b2Vec2(convertedLocation.x ,convertedLocation.y ));
+        //block.body->ApplyForce(newForce,b2Vec2(convertedLocation.x /PTM_RATIO,convertedLocation.y/PTM_RATIO ));
+        
+    }
+    
     //block.body->ApplyForce(b2Vec2(convertedLocation.x,convertedLocation.y), block.body->GetPosition());
     
-    block.body->ApplyLinearImpulse(b2Vec2(destX,destY),block.body->GetWorldCenter());
     
-    //CGPoint newLocation = ccp(convertedLocation.x,convertedLocation.y);
-    //block.position = newLocation;
-    //[block.physicbody]
 
 }
 
